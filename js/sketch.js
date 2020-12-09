@@ -6,6 +6,11 @@ var world;
 var marker;
 var game;
 
+var plane;
+var elevation = 1;
+var gravity = 0.01;
+var gameOverPlane;
+
 function setup() {
   game = new Game();
   // create our world (this also creates a p5 canvas for us)
@@ -138,5 +143,33 @@ function draw() {
     game.pipeArray.push(new Pipe()); //create pipe
   }
   movePlane(); // only for debugging
+  elevation -= gravity;
+  plane.setY(elevation);
+  flyPlane();
   movePipes();
+
+function flyPlane() {
+  if (mouseIsPressed == true) {
+    elevation += 0.05;
+  }
+  if (elevation <= 0){
+    gameOver();
+  }
+}
+
+function gameOver(){
+  gameOverPlane = new Plane({
+    x: 0,
+    y: 0.7,
+    z: 0,
+    scaleX: 1,
+    scaleY: 1,
+    opacity: 0,
+    rotationY: -90,
+    side: 'double'
+  });
+  marker.add(gameOverPlane);
+  gameOverPlane.tag.setAttribute('text',
+  'value: ' + ('Game over') + '; color: rgb(0,255,); align: center;');
+  marker.remove(plane)
 }
