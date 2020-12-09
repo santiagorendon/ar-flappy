@@ -7,6 +7,7 @@ var marker;
 var plane;
 var elevation = 1;
 var gravity = 0.01;
+var gameOverPlane;
 
 function setup() {
   // create our world (this also creates a p5 canvas for us)
@@ -40,4 +41,23 @@ function flyPlane() {
   if (mouseIsPressed == true) {
     elevation += 0.05;
   }
+  if (elevation <= 0){
+    gameOver();
+  }
+}
+
+function gameOver(){
+  gameOverPlane = new Plane({
+    x: 0,
+    y: 0,
+    z: 0,
+    scaleX: 3,
+    scaleY: 3,
+    rotationY: 90,
+    side: 'double'
+  });
+  marker.add(gameOverPlane);
+  gameOverPlane.tag.setAttribute('text',
+  'value: ' + ('Game over') + '; color: rgb(0,0,0); align: center;');
+  marker.remove(plane)
 }
