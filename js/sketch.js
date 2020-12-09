@@ -49,15 +49,16 @@ function flyPlane() {
 function gameOver(){
   gameOverPlane = new Plane({
     x: 0,
-    y: 0,
+    y: 0.7,
     z: 0,
-    scaleX: 3,
-    scaleY: 3,
-    rotationY: 90,
+    scaleX: 1,
+    scaleY: 1,
+    opacity: 0,
+    rotationY: -90,
     side: 'double'
   });
   marker.add(gameOverPlane);
   gameOverPlane.tag.setAttribute('text',
-  'value: ' + ('Game over') + '; color: rgb(0,0,0); align: center;');
+  'value: ' + ('Game over') + '; color: rgb(0,255,); align: center;');
   marker.remove(plane)
 }
