@@ -4,14 +4,10 @@
 var world;
 // create a variable to hold our marker
 var marker;
+// holds game vars
 var game;
-
-var plane;
-var elevation = 1;
-var gravity = 0.01;
-var gameOverPlane;
+// sound assets
 var flapSound, dieSound, pointSound;
-var state;
 
 function preload() {
   flapSound = loadSound("assets/sounds/flap.mp3");
@@ -31,7 +27,7 @@ function setup() {
     asset: 'plane_obj',
     mtl: 'plane_mtl',
     x: 0,
-    y: 0,
+    y: game.planeElevation,
     z: 0,
     rotationY: -90,
     scaleX: game.planeScale,
@@ -39,14 +35,43 @@ function setup() {
     scaleZ: game.planeScale
   });
   marker.addChild(game.plane);
-  game.pipeArray.push(new Pipe()); //create pipe
+  drawMenu();
+}
+
+function drawMenu() {
+  game.menuText = new Plane({
+    x: -1.2,
+    y: 1,
+    z: 0,
+    scaleX: 1,
+    scaleY: 1,
+    opacity: 0,
+    rotationY: -90,
+    side: 'double'
+  });
+  marker.add(game.menuText);
+  game.menuText.tag.setAttribute('text',
+    'value: ' + ('Click Anywhere to Begin!') + '; color: rgb(0,255,255); align: center;');
+}
+function changeScore() {
+  game.scoreBoard.tag.setAttribute('text',
+    'value: ' + (`${game.score}`) + '; color: rgb(0,255,255); align: center;');
 }
 
 class Game { // hold game variables
   constructor() {
-    this.state = "playing";
+    this.score = 0;
+    this.state = "menu";
+    //this.gravity = 0.023;
+    this.gravity = 0.028;
     // plane variables
     this.planeScale = 0.11;
+    //this.planeJump = 0.08;
+    this.planeJumpPower = 0.02;
+    this.planeIsJumping = false;
+    this.planeElevation = 1;
+    this.planeJumpRate = 16;
+    this.planeJumpCounter = 0;
     // pipe vars
     this.pipeArray = [];
     this.pipeSpeed = 0.01;
@@ -56,6 +81,25 @@ class Game { // hold game variables
     this.interval = 110;
     this.pipeGap = 0.65;
   }
+}
+
+function startGame(){
+  marker.remove(game.menuText);
+  game.pipeArray.push(new Pipe()); //create pipe
+  game.scoreBoard = new Plane({
+    x: -1.2,
+    y: 1.5,
+    z: 0,
+    scaleX: 1,
+    scaleY: 1,
+    opacity: 0,
+    rotationY: -90,
+    side: 'double'
+  });
+  marker.add(game.scoreBoard);
+  game.scoreBoard.tag.setAttribute('text',
+    'value: ' + (`${game.score}`) + '; color: rgb(0,255,255); align: center;');
+    game.state = "playing";
 }
 
 function movePipes() {
@@ -70,6 +114,19 @@ function movePipes() {
     // check for collision
     collisionDetection(currentPipe.shape1);
     collisionDetection(currentPipe.shape2);
+    checkIfScored(currentPipe);
+  }
+}
+
+function checkIfScored(pipeClass) {
+  const leftOfPlane = game.plane.getZ() - (1.07 * game.planeScale) > pipeClass.shape1.getZ() + pipeClass.shape1.radius;
+  if(leftOfPlane && (!pipeClass.passed)) {
+    if (!pointSound.isPlaying()) {
+      pointSound.play();
+    }
+    game.score += 1;
+    changeScore();
+    pipeClass.passed = true;
   }
 }
 
@@ -77,7 +134,7 @@ function collisionDetection(pipe) {
   const rightOfPlane = game.plane.getZ() + (1 * game.planeScale) < pipe.getZ() - pipe.radius;
   const leftOfPlane = game.plane.getZ() - (1.07 * game.planeScale) > pipe.getZ() + pipe.radius;
   const topOfPlane = game.plane.getY() + (0.5 * game.planeScale) < pipe.getY() - (pipe.height / 2);
-  const bottomOfPlane = game.plane.getY() - (0.47 * game.planeScale) > pipe.getY() + (pipe.height / 2);
+  const bottomOfPlane = game.plane.getY() - (0.35 * game.planeScale) > pipe.getY() + (pipe.height / 2);
   if (!rightOfPlane && !leftOfPlane && !topOfPlane && !bottomOfPlane) {
     loadGameOver();
   }
@@ -85,6 +142,7 @@ function collisionDetection(pipe) {
 
 class Pipe {
   constructor() {
+    this.passed = false; // if plane passed this pipe
     const pipe1Height = random(0.025, game.totalPipeHeight - game.pipeGap - 0.025);
     this.shape1 = new Cylinder({
       x: 0,
@@ -97,6 +155,17 @@ class Pipe {
       blue: 87
     });
     marker.addChild(this.shape1);
+    this.lip1 = new Cylinder({
+      x: 0,
+      y: pipe1Height - 0.023,
+      z: game.pipeBoundaryX,
+      height: 0.05,
+      radius: 0.22,
+      red: 157,
+      green: 230,
+      blue: 87
+    });
+    marker.addChild(this.lip1);
     const heightPipe2 = game.totalPipeHeight - game.pipeGap - pipe1Height;
     this.shape2 = new Cylinder({
       x: 0,
@@ -109,17 +178,32 @@ class Pipe {
       blue: 87
     });
     marker.addChild(this.shape2);
+    this.lip2 = new Cylinder({
+      x: 0,
+      y: pipe1Height + game.pipeGap,
+      z: game.pipeBoundaryX,
+      height: 0.05,
+      radius: 0.22,
+      red: 157,
+      green: 230,
+      blue: 87
+    });
+    marker.addChild(this.lip2);
   }
   move() {
     if (this.shape1.z < -game.pipeBoundaryX) {
       return -1;
     }
     this.shape1.setZ(this.shape1.getZ() - game.pipeSpeed);
+    this.lip1.setZ(this.lip1.getZ() - game.pipeSpeed);
     this.shape2.setZ(this.shape2.getZ() - game.pipeSpeed);
+    this.lip2.setZ(this.lip2.getZ() - game.pipeSpeed);
   }
   remove() {
     marker.remove(this.shape1);
     marker.remove(this.shape2);
+    marker.remove(this.lip1);
+    marker.remove(this.lip2);
   }
 }
 // debugging only
@@ -156,16 +240,32 @@ function createPipes() {
   }
 }
 
-function movePlane() {
-  elevation -= gravity;
-  game.plane.setY(elevation);
-  if (mouseIsPressed == true) {
-    elevation += 0.05;
-    if (!flapSound.isPlaying() && state != 'over') {
+function mousePressed () {
+  if(game.state === "menu") {
+    startGame();
+  }
+  if(game.state === "playing") {
+    if (!flapSound.isPlaying() && game.state != 'over') {
       flapSound.play();
     }
+    game.planeIsJumping = true;
+    game.planeJumpCounter = 0;
   }
-  if (elevation <= 0) {
+}
+function movePlane() {
+  if(game.planeIsJumping) {
+    game.planeElevation += game.planeJumpPower;
+    game.planeJumpCounter += 1;
+    if(game.planeJumpCounter === game.planeJumpRate){
+      game.planeIsJumping = false;
+      game.planeJumpCounter = 0;
+    }
+  }
+  else{
+    game.planeElevation -= game.gravity;
+  }
+  game.plane.setY(game.planeElevation);
+  if (game.planeElevation <= -0.1) {
     loadGameOver();
   }
 }
@@ -180,15 +280,14 @@ function removePipes() {
 }
 
 function loadGameOver() {
-  game.state = "over";
-  if (!dieSound.isPlaying() && state != 'over') {
+  if (!dieSound.isPlaying() && game.state != 'over') {
     dieSound.play();
   }
-  state = 'over';
+  game.state = 'over';
 
-  gameOverPlane = new Plane({
-    x: 0,
-    y: 0.7,
+  const gameOverPlane = new Plane({
+    x: -1.2,
+    y: 1,
     z: 0,
     scaleX: 1,
     scaleY: 1,
@@ -207,7 +306,7 @@ function draw() {
   if (game.state === "playing") {
     game.counter += 1;
     createPipes();
-    //controlPlane(); // only for debugging
+    controlPlane(); // only for debugging
     movePlane();
     movePipes();
   }
