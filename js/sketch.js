@@ -1,6 +1,7 @@
+/*jshint esversion: 10 */
+
 // create a variable to hold our world object
 var world;
-
 // create a variable to hold our marker
 var marker;
 
@@ -11,7 +12,7 @@ function setup() {
   // grab a reference to the marker that we set up on the HTML side (connect to it using its 'id')
   marker = world.getMarker('hiro');
 
-  enemyPlane = new OBJ({
+  plane = new OBJ({
 		asset: 'plane_obj',
     mtl: 'plane_mtl',
 		x: 0, y:0, z:0,
@@ -20,12 +21,28 @@ function setup() {
 		scaleY: 0.15,
 		scaleZ: 0.15
 	});
-	marker.addChild(enemyPlane);
+	marker.addChild(plane);
+
+  pipe1 = new Pipe();
 }
 
+class Pipe {
+  constructor() {
+    this.shape = new Cylinder ({
+        x: 0,
+        y: 0,
+        z: 0.9,
+        height: 1,
+        radius: 0.2,
+        red: 157,
+        green: 230,
+        blue: 87
+    });
+    marker.addChild(this.shape);
+  }
+}
 
 function draw() {
-
 
 
 }
