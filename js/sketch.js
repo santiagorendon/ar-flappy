@@ -13,11 +13,12 @@ var gameOverPlane;
 var flapSound, dieSound, pointSound;
 var state;
 
-function preload(){
-  flapSound = loadSound("assets/sounds/flap.mp3")
-  dieSound = loadSound("assets/sounds/die.mp3")
-  pointSound = loadSound("assets/sounds/point.mp3")
+function preload() {
+  flapSound = loadSound("assets/sounds/flap.mp3");
+  dieSound = loadSound("assets/sounds/die.mp3");
+  pointSound = loadSound("assets/sounds/point.mp3");
 }
+
 function setup() {
   game = new Game();
   // create our world (this also creates a p5 canvas for us)
@@ -38,12 +39,14 @@ function setup() {
     scaleZ: game.planeScale
   });
   marker.addChild(game.plane);
+  game.pipeArray.push(new Pipe()); //create pipe
 }
 
 class Game { // hold game variables
   constructor() {
+    this.state = "playing";
     // plane variables
-    this.planeScale = 0.15;
+    this.planeScale = 0.11;
     // pipe vars
     this.pipeArray = [];
     this.pipeSpeed = 0.01;
@@ -51,7 +54,7 @@ class Game { // hold game variables
     this.pipeBoundaryX = 1.5;
     this.counter = 0; //counter to keep track of pipe creation
     this.interval = 110;
-    this.pipeGap = 0.45;
+    this.pipeGap = 0.65;
   }
 }
 
@@ -60,8 +63,7 @@ function movePipes() {
     const currentPipe = game.pipeArray[i];
     const res = currentPipe.move();
     if (res === -1) { //pipe disapeared
-      marker.remove(currentPipe.shape1);
-      marker.remove(currentPipe.shape2);
+      currentPipe.remove();
       game.pipeArray.splice(i, 1);
       i -= 1;
     }
@@ -72,12 +74,12 @@ function movePipes() {
 }
 
 function collisionDetection(pipe) {
-  const rightOfPlane = game.plane.getZ() + 0.15 < pipe.getZ() - pipe.radius;
-  const leftOfPlane = game.plane.getZ() - 0.16 > pipe.getZ() + pipe.radius;
-  const topOfPlane = game.plane.getY() + 0.08 < pipe.getY() - (pipe.height / 2);
-  const bottomOfPlane = game.plane.getY() - 0.07 > pipe.getY() + (pipe.height / 2);
+  const rightOfPlane = game.plane.getZ() + (1 * game.planeScale) < pipe.getZ() - pipe.radius;
+  const leftOfPlane = game.plane.getZ() - (1.07 * game.planeScale) > pipe.getZ() + pipe.radius;
+  const topOfPlane = game.plane.getY() + (0.5 * game.planeScale) < pipe.getY() - (pipe.height / 2);
+  const bottomOfPlane = game.plane.getY() - (0.47 * game.planeScale) > pipe.getY() + (pipe.height / 2);
   if (!rightOfPlane && !leftOfPlane && !topOfPlane && !bottomOfPlane) {
-    console.log("collision");
+    loadGameOver();
   }
 }
 
@@ -115,21 +117,25 @@ class Pipe {
     this.shape1.setZ(this.shape1.getZ() - game.pipeSpeed);
     this.shape2.setZ(this.shape2.getZ() - game.pipeSpeed);
   }
+  remove() {
+    marker.remove(this.shape1);
+    marker.remove(this.shape2);
+  }
 }
 // debugging only
-// function keyPressed() {
-//   if (keyCode === 87) { // up
-//     game.plane.setY(game.plane.getY()+0.025);
-//   } else if (keyCode === 83) { // down
-//     game.plane.setY(game.plane.getY()-0.025);
-//   } else if (keyCode === 65) { //left
-//     game.plane.setZ(game.plane.getZ()-0.025);
-//   } else if (keyCode === 68) { //left
-//     game.plane.setZ(game.plane.getZ()+0.025);
-//   }
-// }
+function keyPressed() {
+  if (keyCode === 87) { // up
+    game.plane.setY(game.plane.getY() + 0.015);
+  } else if (keyCode === 83) { // down
+    game.plane.setY(game.plane.getY() - 0.015);
+  } else if (keyCode === 65) { //left
+    game.plane.setZ(game.plane.getZ() - 0.015);
+  } else if (keyCode === 68) { //left
+    game.plane.setZ(game.plane.getZ() + 0.015);
+  }
+}
 
-function movePlane() {
+function controlPlane() {
   if (keyIsPressed) {
     if (keyCode === 87) { // up
       game.plane.setY(game.plane.getY() + 0.015);
@@ -143,33 +149,40 @@ function movePlane() {
   }
 }
 
-function draw() {
-  game.counter += 1;
+function createPipes() {
   if (game.counter > game.interval) {
     game.counter = 0;
     game.pipeArray.push(new Pipe()); //create pipe
   }
-  movePlane(); // only for debugging
-  elevation -= gravity;
-  plane.setY(elevation);
-  flyPlane();
-  movePipes();
+}
 
-function flyPlane() {
+function movePlane() {
+  elevation -= gravity;
+  game.plane.setY(elevation);
   if (mouseIsPressed == true) {
     elevation += 0.05;
-    if (!flapSound.isPlaying()  && state != 'over'){
-      flapSound.play()
+    if (!flapSound.isPlaying() && state != 'over') {
+      flapSound.play();
     }
   }
-  if (elevation <= 0){
-    gameOver();
+  if (elevation <= 0) {
+    loadGameOver();
   }
 }
 
-function gameOver(){
-  if (!dieSound.isPlaying() && state != 'over' ){
-    dieSound.play()
+function removePipes() {
+  for (let i = 0; i < game.pipeArray.length; i++) {
+    // remove pipes
+    game.pipeArray[i].remove();
+    game.pipeArray.splice(i, 1);
+    i -= 1;
+  }
+}
+
+function loadGameOver() {
+  game.state = "over";
+  if (!dieSound.isPlaying() && state != 'over') {
+    dieSound.play();
   }
   state = 'over';
 
@@ -185,6 +198,17 @@ function gameOver(){
   });
   marker.add(gameOverPlane);
   gameOverPlane.tag.setAttribute('text',
-  'value: ' + ('Game over') + '; color: rgb(0,255,); align: center;');
-  marker.remove(plane)
+    'value: ' + ('Game over') + '; color: rgb(0,255,255); align: center;');
+  // marker.remove(game.plane);
+  // removePipes();
+}
+
+function draw() {
+  if (game.state === "playing") {
+    game.counter += 1;
+    createPipes();
+    //controlPlane(); // only for debugging
+    movePlane();
+    movePipes();
+  }
 }
