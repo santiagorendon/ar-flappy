@@ -4,7 +4,7 @@ var world;
 // create a variable to hold our marker
 var marker;
 
-var plane
+var plane;
 var elevation = 1
 var gravity = 0.01
 
@@ -28,12 +28,14 @@ function setup() {
 }
 
 
-function draw() {
+function draw(){
+    elevation -= gravity;
+    plane.setY(elevation);
+    flyPlane();
+}
 
-    elevation -= gravity
-    plane.setY(elevation)
-
-    if (mouseIsPressed == true){
-      elevation += .05
-    }
+function flyPlane(){
+  if (mouseIsPressed == true){
+    elevation += .05;
+  }
 }
