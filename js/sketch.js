@@ -5,8 +5,8 @@ var world;
 var marker;
 
 var plane;
-var elevation = 1
-var gravity = 0.01
+var elevation = 1;
+var gravity = 0.01;
 
 function setup() {
   // create our world (this also creates a p5 canvas for us)
@@ -16,26 +16,28 @@ function setup() {
   marker = world.getMarker('hiro');
 
   plane = new OBJ({
-		asset: 'plane_obj',
+    asset: 'plane_obj',
     mtl: 'plane_mtl',
-		x: 0, y:elevation, z:0,
+    x: 0,
+    y: elevation,
+    z: 0,
     rotationY: -90,
     scaleX: 0.15,
-		scaleY: 0.15,
-		scaleZ: 0.15
-	});
-	marker.addChild(plane);
+    scaleY: 0.15,
+    scaleZ: 0.15
+  });
+  marker.addChild(plane);
 }
 
 
-function draw(){
-    elevation -= gravity;
-    plane.setY(elevation);
-    flyPlane();
+function draw() {
+  elevation -= gravity;
+  plane.setY(elevation);
+  flyPlane();
 }
 
-function flyPlane(){
-  if (mouseIsPressed == true){
-    elevation += .05;
+function flyPlane() {
+  if (mouseIsPressed == true) {
+    elevation += 0.05;
   }
 }
