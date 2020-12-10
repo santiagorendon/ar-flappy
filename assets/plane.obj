@@ -1,7 +1,7 @@
 # Blender v2.78 (sub 0) OBJ File: '1 iternal.blend'
 # www.blender.org
-mtllib PUSHILIN_Plane.mtl
-o PUSHILIN_Plane_Circle.000
+mtllib plane.mtl
+o plane_Circle.000
 v 0.892075 -0.103654 0.199111
 v 0.849999 0.060389 0.322168
 v 0.797989 0.263158 0.322168

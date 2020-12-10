@@ -51,7 +51,7 @@ function drawMenu() {
   });
   marker.add(game.menuText);
   game.menuText.tag.setAttribute('text',
-    'value: ' + ('Click Anywhere to Begin!') + '; color: rgb(0,255,255); align: center;');
+    'value: ' + ('CLICK TO BEGIN') + '; color: rgb(0,255,255); align: center;');
 }
 function changeScore() {
   game.scoreBoard.tag.setAttribute('text',
@@ -100,6 +100,21 @@ function startGame(){
   game.scoreBoard.tag.setAttribute('text',
     'value: ' + (`${game.score}`) + '; color: rgb(0,255,255); align: center;');
     game.state = "playing";
+}
+
+function restartGame() {
+  removePipes();
+  marker.remove(game.gameOverPlane);
+  game.planeElevation = 1;
+  game.plane.setY(game.planeElevation);
+  game.plane.setZ(0);
+  game.score = 0;
+  changeScore();
+  game.state = "playing";
+  game.pipeArray.push(new Pipe()); //create pipe
+  game.planeJumpCounter = 0;
+  game.planeIsJumping = false;
+  game.counter = 0;
 }
 
 function movePipes() {
@@ -244,14 +259,18 @@ function mousePressed () {
   if(game.state === "menu") {
     startGame();
   }
-  if(game.state === "playing") {
+  else if(game.state === "playing") {
     if (!flapSound.isPlaying() && game.state != 'over') {
       flapSound.play();
     }
     game.planeIsJumping = true;
     game.planeJumpCounter = 0;
   }
+  else if(game.state === "over") {
+    restartGame();
+  }
 }
+
 function movePlane() {
   if(game.planeIsJumping) {
     game.planeElevation += game.planeJumpPower;
@@ -285,7 +304,7 @@ function loadGameOver() {
   }
   game.state = 'over';
 
-  const gameOverPlane = new Plane({
+  game.gameOverPlane = new Plane({
     x: -1.2,
     y: 1,
     z: 0,
@@ -295,9 +314,9 @@ function loadGameOver() {
     rotationY: -90,
     side: 'double'
   });
-  marker.add(gameOverPlane);
-  gameOverPlane.tag.setAttribute('text',
-    'value: ' + ('Game over') + '; color: rgb(0,255,255); align: center;');
+  marker.add(game.gameOverPlane);
+  game.gameOverPlane.tag.setAttribute('text',
+    'value: ' + ('GAME OVER!\nCLICK TO RESTART') + '; color: rgb(0,255,255); align: center;');
   // marker.remove(game.plane);
   // removePipes();
 }
