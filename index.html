@@ -2,19 +2,19 @@
 <html lang="en-us">
 	<head>
 		<!-- A-Frame libraries -->
-		<script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+		<script src="js/aframe.min.js"></script>
 
 		<!-- AR.js Library -->
-		<script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+		<script src="js/aframe-ar.js"></script>
 
 		<!-- P5 libraries -->
-		<script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
+		<script src="js/p5.min.js"></script>
 
 		<script src="../p5/addons/p5.sound.min.js"></script>
 
 
 		<!-- Craig's AFrameP5 AR library -->
-		<script src="https://craignyu.github.io/aframep5-ar/libraries/aframep5_ar.js"></script>
+		<script src="js/aframep5_ar.js"></script>
 
 		<!-- P5 Sketch -->
 		<script src="js/sketch.js"></script>
@@ -71,7 +71,7 @@
 
 			<!-- set up all of the AR markers we will be working with along with links to their 'pattern' files -->
 			<!-- note that we aren't putting any geometry inside of marker here - we will do that in the p5 sketch -->
-			<a-marker id="hiro" type="pattern" url="markers/patt.hiro">
+			<a-marker id="hiro" type="pattern" url="markers/patt.kanji">
 				</a-marker>
 
 			<a-entity camera></a-entity>
