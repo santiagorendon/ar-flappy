@@ -17,6 +17,12 @@ function preload() {
 
 function setup() {
   game = new Game();
+  if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+   //easier on mobile
+   this.planeJumpPower = 0.01;
+   game.planeJumpRate = 12;
+   game.pipeGap = 0.7;
+  }
   // create our world (this also creates a p5 canvas for us)
   world = new World('ARScene');
 
@@ -79,7 +85,7 @@ class Game { // hold game variables
     this.pipeBoundaryX = 1.5;
     this.counter = 0; //counter to keep track of pipe creation
     this.interval = 110;
-    this.pipeGap = 0.65;
+    this.pipeGap = 0.60;
   }
 }
 
